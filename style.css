@@ -1,0 +1,33 @@
+#board {
+  height: 800px;
+  width: 800px;
+
+  border: 1px solid black;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.squareDark {
+  height: 100px;
+  width: 100px;
+  background-color: rgb(148, 84, 0);
+}
+.squareLight {
+  height: 100px;
+  width: 100px;
+  background-color: rgb(255, 255, 255);
+}
+
+#Queen_Black {
+  height: 100px;
+  width: 100px;
+}
+img {
+  height: 90px;
+  width: 90px;
+  margin: 5px;
+}
+.squareDark,
+.squareLight {
+  position: fixed;
+}
