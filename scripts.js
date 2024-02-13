@@ -1,165 +1,223 @@
 let turn = "white";
+let moveDisplay = document.getElementById("move");
+let moveCounter = -15;
+let mouseSquare;
+let currentPiece = 0;
 
 const pieces = {
   Pawn_White1: {
     link: document.getElementById("Pawn_White1"),
     position: "a2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White2: {
     link: document.getElementById("Pawn_White2"),
     position: "b2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White3: {
     link: document.getElementById("Pawn_White3"),
     position: "c2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White4: {
     link: document.getElementById("Pawn_White4"),
     position: "d2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White5: {
     link: document.getElementById("Pawn_White5"),
     position: "e2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White6: {
     link: document.getElementById("Pawn_White6"),
     position: "f2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White7: {
     link: document.getElementById("Pawn_White7"),
     position: "g2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_White8: {
     link: document.getElementById("Pawn_White8"),
     position: "h2",
     color: "white",
+    type: "Pawn",
+    hasMoved: false,
   },
   Rook_White1: {
     link: document.getElementById("Rook_White1"),
     position: "a1",
     color: "white",
+    type: "Rook",
+    hasMoved: false,
   },
   Knight_White1: {
     link: document.getElementById("Knight_White1"),
     position: "b1",
     color: "white",
+    type: "Knight",
   },
   Bishop_White1: {
     link: document.getElementById("Bishop_White1"),
     position: "c1",
     color: "white",
+    type: "Bishop",
   },
   Queen_White: {
     link: document.getElementById("Queen_White"),
     position: "d1",
     color: "white",
+    type: "Queen",
   },
   King_White: {
     link: document.getElementById("King_White"),
     position: "e1",
     color: "white",
+    type: "King",
+    hasMoved: false,
   },
   Bishop_White2: {
     link: document.getElementById("Bishop_White2"),
     position: "f1",
     color: "white",
+    type: "Bishop",
   },
   Knight_White2: {
     link: document.getElementById("Knight_White2"),
     position: "g1",
     color: "white",
+    type: "Knight",
   },
   Rook_White2: {
     link: document.getElementById("Rook_White2"),
     position: "h1",
     color: "white",
+    type: "Rook",
+    hasMoved: false,
   },
   Pawn_Black1: {
     link: document.getElementById("Pawn_Black1"),
     position: "a7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black2: {
     link: document.getElementById("Pawn_Black2"),
     position: "b7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black3: {
     link: document.getElementById("Pawn_Black3"),
     position: "c7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black4: {
     link: document.getElementById("Pawn_Black4"),
     position: "d7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black5: {
     link: document.getElementById("Pawn_Black5"),
     position: "e7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black6: {
     link: document.getElementById("Pawn_Black6"),
     position: "f7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black7: {
     link: document.getElementById("Pawn_Black7"),
     position: "g7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Pawn_Black8: {
     link: document.getElementById("Pawn_Black8"),
     position: "h7",
     color: "black",
+    type: "Pawn",
+    hasMoved: false,
   },
   Rook_Black1: {
     link: document.getElementById("Rook_Black1"),
     position: "a8",
     color: "black",
+    type: "Rook",
+    hasMoved: false,
   },
   Knight_Black1: {
     link: document.getElementById("Knight_Black1"),
     position: "b8",
     color: "black",
+    type: "Knight",
   },
   Bishop_Black1: {
     link: document.getElementById("Bishop_Black1"),
     position: "c8",
     color: "black",
+    type: "Bishop",
   },
   Queen_Black: {
     link: document.getElementById("Queen_Black"),
     position: "d8",
     color: "black",
+    type: "Queen",
   },
   King_Black: {
     link: document.getElementById("King_Black"),
     position: "e8",
     color: "black",
+    type: "King",
+    hasMoved: false,
   },
   Bishop_Black2: {
     link: document.getElementById("Bishop_Black2"),
     position: "f8",
     color: "black",
+    type: "Bishop",
   },
   Knight_Black2: {
     link: document.getElementById("Knight_Black2"),
     position: "g8",
     color: "black",
+    type: "Knight",
   },
   Rook_Black2: {
     link: document.getElementById("Rook_Black2"),
     position: "h8",
     color: "black",
+    type: "Rook",
+    hasMoved: false,
   },
 };
 
@@ -268,6 +326,71 @@ function setup() {
 
 setup();
 
+function isLegalMove(piece, newLocation) {
+  let oldLocation = pieces[piece].position;
+  let result = [];
+  result.push(squares[oldLocation][0] - squares[newLocation][0]);
+  result.push(squares[oldLocation][1] - squares[newLocation][1]);
+  if (pieces[piece].type === "Pawn") {
+    if (
+      (((result[0] === 0 && result[1] === -1) ||
+        (result[0] === 0 &&
+          result[1] === -2 &&
+          pieces[piece].hasMoved === false)) &&
+        pieces[piece].color === "white") ||
+      (((result[0] === 0 && result[1] === 1) ||
+        (result[0] === 0 &&
+          result[1] === 2 &&
+          pieces[piece].hasMoved === false)) &&
+        pieces[piece].color === "black")
+    ) {
+      return true;
+    }
+  } else if (pieces[piece].type === "Rook") {
+    if (result[0] === 0 || result[1] === 0) return true;
+  } else if (pieces[piece].type === "Bishop") {
+    if (result[0] === result[1] || result[0] === -result[1]) {
+      return true;
+    }
+  } else if (pieces[piece].type === "Knight") {
+    if (
+      (result[0] === 2 && result[1] === 1) ||
+      (result[0] === -2 && result[1] === 1) ||
+      (result[0] === 2 && result[1] === -1) ||
+      (result[0] === -2 && result[1] === -1) ||
+      (result[0] === 1 && result[1] === 2) ||
+      (result[0] === -1 && result[1] === 2) ||
+      (result[0] === 1 && result[1] === -2) ||
+      (result[0] === -1 && result[1] === -2)
+    ) {
+      return true;
+    }
+  } else if (pieces[piece].type === "Queen") {
+    if (
+      result[0] === 0 ||
+      result[1] === 0 ||
+      result[0] === result[1] ||
+      result[0] === -result[1]
+    ) {
+      return true;
+    }
+  } else if (pieces[piece].type === "King") {
+    if (
+      (result[0] === 0 && result[1] === 1) ||
+      (result[0] === 1 && result[1] === 1) ||
+      (result[0] === -1 && result[1] === 1) ||
+      (result[0] === 1 && result[1] === 0) ||
+      (result[0] === -1 && result[1] === 0) ||
+      (result[0] === 0 && result[1] === -1) ||
+      (result[0] === 1 && result[1] === -1) ||
+      (result[0] === -1 && result[1] === -1)
+    ) {
+      return true;
+    }
+  } else {
+    return false;
+  }
+}
 function highlight(piece) {
   pieces[piece].link.style.backgroundColor = "rgba(255,165,0,0.9)";
 }
@@ -276,9 +399,28 @@ function clearHighlight(piece) {
     pieces[piece].link.style.backgroundColor = "transparent";
   }
 }
-let mouseSquare;
-let currentPiece = 0;
+function clearOtherPieces(currentPiece, square) {
+  let pieceToClear = 0;
+  for (let key in pieces) {
+    let piece = pieces[key];
+    if (piece.position === square && piece != pieces[currentPiece]) {
+      pieceToClear = key;
+    }
+  }
+  move(pieceToClear, "gone", "no");
 
+  // find all pieces on the square
+  // clear all of them exept the current piece
+}
+function checkforpiece(x, y) {
+  for (let key in pieces) {
+    let piece = pieces[key];
+    if (piece.position === square) {
+      return true;
+    }
+  }
+  return false;
+}
 function move(piece, square, counts = "yes") {
   if (piece != 0) {
     pieces[piece].link.style.top = 100 * -squares[square][1] + 810 + "px";
@@ -289,13 +431,32 @@ function move(piece, square, counts = "yes") {
         turn = "black";
       } else {
         turn = "white";
+        moveCounter += 1;
       }
     }
-
+    moveDisplay.innerHTML =
+      "It is " + turn + "'s turn on move number " + moveCounter;
     console.log(turn);
   }
 }
-
+function checkPiecesInWay(fromSquare, toSquare) {
+  let difference = [];
+  difference.push(fromSquare[0] - toSquare[0]);
+  difference.push(fromSquare[1] - toSquare[1]);
+  let result = false;
+  if (difference[0] === 0) {
+    //rook from top to bottom or botton to top
+    for (i = fromSquare[0] + 1; i++; i < toSquare[0]) {
+      let result = checkforpiece(fromSquare[0], i);
+    }
+  } else if (difference[1] === 0) {
+    for (i = fromSquare[1] + 1; i++; i < toSquare[1]) {
+      result = checkforpiece(i, fromSquare[1]);
+    }
+  } else {
+    return result;
+  }
+}
 document.addEventListener("mousemove", function (event) {
   var mouseX = Math.round((event.clientX - 8) / 100 + 0.5);
   var mouseY = Math.round((805 - event.clientY) / 100 + 0.5);
@@ -312,6 +473,7 @@ document.addEventListener("mousemove", function (event) {
 });
 
 document.addEventListener("mousedown", function (event) {
+  let legalMove = false;
   checkPieceOnSquare(mouseSquare);
 
   function checkPieceOnSquare(square) {
@@ -324,24 +486,15 @@ document.addEventListener("mousedown", function (event) {
         return;
       }
     }
-    move(currentPiece, square);
-    if (currentPiece != 0) {
-      clearOtherPieces(currentPiece, square);
+    legalMove = isLegalMove(currentPiece, square);
+    if (legalMove === true) {
+      move(currentPiece, square);
+      if (currentPiece != 0) {
+        clearOtherPieces(currentPiece, square);
+      }
     }
+
     clearHighlight(currentPiece);
     currentPiece = 0;
   }
 });
-function clearOtherPieces(currentPiece, square) {
-  let pieceToClear = 0;
-  for (let key in pieces) {
-    let piece = pieces[key];
-    if (piece.position === square && piece != pieces[currentPiece]) {
-      pieceToClear = key;
-    }
-  }
-  move(pieceToClear, "gone", "no");
-
-  // find all pieces on the square
-  // clear all of them exept the current piece
-}
