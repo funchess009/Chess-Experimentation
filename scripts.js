@@ -331,20 +331,32 @@ function isLegalMove(piece, newLocation) {
   let result = [];
   result.push(squares[oldLocation][0] - squares[newLocation][0]);
   result.push(squares[oldLocation][1] - squares[newLocation][1]);
+  console.log(result);
   if (pieces[piece].type === "Pawn") {
-    if (
-      (((result[0] === 0 && result[1] === -1) ||
+    if (pieces[piece].color === "white") {
+      if (
+        (result[0] === 0 && result[1] === -1) || // white pawn moves 1x
+        //
         (result[0] === 0 &&
           result[1] === -2 &&
-          pieces[piece].hasMoved === false)) &&
-        pieces[piece].color === "white") ||
-      (((result[0] === 0 && result[1] === 1) ||
-        (result[0] === 0 &&
-          result[1] === 2 &&
-          pieces[piece].hasMoved === false)) &&
-        pieces[piece].color === "black")
-    ) {
-      return true;
+          pieces[piece].hasMoved === false) || // white pawn moves up 2x
+        //
+        (result[0] === -1 &&
+          result[1] === -1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === true) || // White Pawn captures right
+        (result[0] === 1 &&
+          result[1] === -1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === true) // White Pawn captures left
+      ) {
+        return true;
+      }
+    } else if (pieces[piece].color === "black") {
+      if (
+        (result[0] === 0 && result[1] === 1) ||
+        (result[0] === 0 && result[1] === 2 && pieces[piece].hasMoved === false)
+      ) {
+        return true;
+      }
     }
   } else if (pieces[piece].type === "Rook") {
     if (result[0] === 0 || result[1] === 0) return true;
@@ -415,7 +427,7 @@ function clearOtherPieces(currentPiece, square) {
 function checkforpiece(x, y) {
   for (let key in pieces) {
     let piece = pieces[key];
-    if (piece.position === square) {
+    if (piece.position[0] === x && piece.position[1] === y) {
       return true;
     }
   }
@@ -457,6 +469,7 @@ function checkPiecesInWay(fromSquare, toSquare) {
     return result;
   }
 }
+
 document.addEventListener("mousemove", function (event) {
   var mouseX = Math.round((event.clientX - 8) / 100 + 0.5);
   var mouseY = Math.round((805 - event.clientY) / 100 + 0.5);
@@ -489,6 +502,15 @@ document.addEventListener("mousedown", function (event) {
     legalMove = isLegalMove(currentPiece, square);
     if (legalMove === true) {
       move(currentPiece, square);
+      if (
+        pieces[currentPiece].type === "Pawn" ||
+        pieces[currentPiece].type === "Rook" ||
+        pieces[currentPiece].type === "King"
+      ) {
+        if (pieces[currentPiece].hasMoved === false) {
+          pieces[currentPiece].hasMoved = true;
+        }
+      }
       if (currentPiece != 0) {
         clearOtherPieces(currentPiece, square);
       }
