@@ -1,8 +1,9 @@
 let turn = "white";
 let moveDisplay = document.getElementById("move");
-let moveCounter = -15;
+let moveCounter = 1;
 let mouseSquare;
 let currentPiece = 0;
+let moveStorage = [];
 
 const pieces = {
   Pawn_White1: {
@@ -290,38 +291,38 @@ const squares = {
 };
 
 function setup() {
-  move("Pawn_White1", "a2");
-  move("Pawn_White2", "b2");
-  move("Pawn_White3", "c2");
-  move("Pawn_White4", "d2");
-  move("Pawn_White5", "e2");
-  move("Pawn_White6", "f2");
-  move("Pawn_White7", "g2");
-  move("Pawn_White8", "h2");
-  move("Rook_White1", "a1");
-  move("Rook_White2", "h1");
-  move("Knight_White1", "b1");
-  move("Knight_White2", "g1");
-  move("Bishop_White1", "c1");
-  move("Bishop_White2", "f1");
-  move("King_White", "e1");
-  move("Queen_White", "d1");
-  move("Pawn_Black1", "a7");
-  move("Pawn_Black2", "b7");
-  move("Pawn_Black3", "c7");
-  move("Pawn_Black4", "d7");
-  move("Pawn_Black5", "e7");
-  move("Pawn_Black6", "f7");
-  move("Pawn_Black7", "g7");
-  move("Pawn_Black8", "h7");
-  move("Rook_Black1", "a8");
-  move("Rook_Black2", "h8");
-  move("Knight_Black1", "b8");
-  move("Knight_Black2", "g8");
-  move("Bishop_Black1", "c8");
-  move("Bishop_Black2", "f8");
-  move("King_Black", "e8");
-  move("Queen_Black", "d8");
+  move("Pawn_White1", "a2", "no");
+  move("Pawn_White2", "b2", "no");
+  move("Pawn_White3", "c2", "no");
+  move("Pawn_White4", "d2", "no");
+  move("Pawn_White5", "e2", "no");
+  move("Pawn_White6", "f2", "no");
+  move("Pawn_White7", "g2", "no");
+  move("Pawn_White8", "h2", "no");
+  move("Rook_White1", "a1", "no");
+  move("Rook_White2", "h1", "no");
+  move("Knight_White1", "b1", "no");
+  move("Knight_White2", "g1", "no");
+  move("Bishop_White1", "c1", "no");
+  move("Bishop_White2", "f1", "no");
+  move("King_White", "e1", "no");
+  move("Queen_White", "d1", "no");
+  move("Pawn_Black1", "a7", "no");
+  move("Pawn_Black2", "b7", "no");
+  move("Pawn_Black3", "c7", "no");
+  move("Pawn_Black4", "d7", "no");
+  move("Pawn_Black5", "e7", "no");
+  move("Pawn_Black6", "f7", "no");
+  move("Pawn_Black7", "g7", "no");
+  move("Pawn_Black8", "h7", "no");
+  move("Rook_Black1", "a8", "no");
+  move("Rook_Black2", "h8", "no");
+  move("Knight_Black1", "b8", "no");
+  move("Knight_Black2", "g8", "no");
+  move("Bishop_Black1", "c8", "no");
+  move("Bishop_Black2", "f8", "no");
+  move("King_Black", "e8", "no");
+  move("Queen_Black", "d8", "no");
 }
 
 setup();
@@ -335,11 +336,15 @@ function isLegalMove(piece, newLocation) {
   if (pieces[piece].type === "Pawn") {
     if (pieces[piece].color === "white") {
       if (
-        (result[0] === 0 && result[1] === -1) || // white pawn moves 1x
+        (result[0] === 0 &&
+          result[1] === -1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === false) || // white pawn moves 1x
         //
         (result[0] === 0 &&
           result[1] === -2 &&
-          pieces[piece].hasMoved === false) || // white pawn moves up 2x
+          pieces[piece].hasMoved === false &&
+          checkforpiece(newLocation[0], newLocation[1]) === false &&
+          checkforpiece(newLocation[0], newLocation[1] - 1) === false) || // white pawn moves up 2x
         //
         (result[0] === -1 &&
           result[1] === -1 &&
@@ -352,8 +357,19 @@ function isLegalMove(piece, newLocation) {
       }
     } else if (pieces[piece].color === "black") {
       if (
-        (result[0] === 0 && result[1] === 1) ||
-        (result[0] === 0 && result[1] === 2 && pieces[piece].hasMoved === false)
+        (result[0] === 0 &&
+          result[1] === 1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === false) ||
+        (result[0] === 0 &&
+          result[1] === 2 &&
+          pieces[piece].hasMoved === false &&
+          checkforpiece(newLocation[0], newLocation[1]) === false) ||
+        (result[0] === 1 &&
+          result[1] === 1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === true) || // Black Pawn captures left
+        (result[0] === -1 &&
+          result[1] === 1 &&
+          checkforpiece(newLocation[0], newLocation[1]) === true) // Black Pawn captures right
       ) {
         return true;
       }
@@ -441,6 +457,7 @@ function move(piece, square, counts = "yes") {
     if (counts === "yes") {
       if (turn === "white") {
         turn = "black";
+        aiMove();
       } else {
         turn = "white";
         moveCounter += 1;
@@ -459,11 +476,11 @@ function checkPiecesInWay(fromSquare, toSquare) {
   if (difference[0] === 0) {
     //rook from top to bottom or botton to top
     for (i = fromSquare[0] + 1; i++; i < toSquare[0]) {
-      let result = checkforpiece(fromSquare[0], i);
+      let result = pieceCheck(fromSquare[0], i);
     }
   } else if (difference[1] === 0) {
     for (i = fromSquare[1] + 1; i++; i < toSquare[1]) {
-      result = checkforpiece(i, fromSquare[1]);
+      result = pieceCheck(i, fromSquare[1]);
     }
   } else {
     return result;
@@ -520,3 +537,36 @@ document.addEventListener("mousedown", function (event) {
     currentPiece = 0;
   }
 });
+function pieceCheck(square) {
+  for (let key in pieces) {
+    let piece = pieces[key];
+    if (piece.position === square) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function aiMove() {
+  let pieceChoice = getRandomBlackPiece();
+  let squareChoice = getRandomSquare();
+  console.log(pieceChoice, squareChoice);
+  if (
+    isLegalMove(pieceChoice, squareChoice) === true &&
+    pieces[pieceChoice].position != "gone"
+  ) {
+    move(pieceChoice, squareChoice);
+  } else aiMove();
+}
+function getRandomSquare() {
+  const keys = Object.keys(squares).filter((key) => key !== "gone");
+  const randomKey = keys[Math.floor(Math.random() * keys.length)];
+  return randomKey;
+}
+function getRandomBlackPiece() {
+  const blackKeys = Object.keys(pieces).filter(
+    (key) => pieces[key].color === "black"
+  );
+  const randomKey = blackKeys[Math.floor(Math.random() * blackKeys.length)];
+  return randomKey;
+}
