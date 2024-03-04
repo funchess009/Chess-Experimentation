@@ -435,7 +435,11 @@ function clearOtherPieces(currentPiece, square) {
       pieceToClear = key;
     }
   }
-  move(pieceToClear, "gone", "no");
+  if (pieces[pieceToClear].type != "King") {
+    move(pieceToClear, "gone", "no");
+  } else {
+    console.log("you win");
+  }
 
   // find all pieces on the square
   // clear all of them exept the current piece
@@ -518,6 +522,9 @@ document.addEventListener("mousedown", function (event) {
     }
     legalMove = isLegalMove(currentPiece, square);
     if (legalMove === true) {
+      if (currentPiece != 0) {
+        clearOtherPieces(currentPiece, square);
+      }
       move(currentPiece, square);
       if (
         pieces[currentPiece].type === "Pawn" ||
@@ -527,9 +534,6 @@ document.addEventListener("mousedown", function (event) {
         if (pieces[currentPiece].hasMoved === false) {
           pieces[currentPiece].hasMoved = true;
         }
-      }
-      if (currentPiece != 0) {
-        clearOtherPieces(currentPiece, square);
       }
     }
 
@@ -553,6 +557,7 @@ function aiMove() {
   console.log(pieceChoice, squareChoice);
   if (
     isLegalMove(pieceChoice, squareChoice) === true &&
+    pieceCheck(squareChoice) === false &&
     pieces[pieceChoice].position != "gone"
   ) {
     move(pieceChoice, squareChoice);
